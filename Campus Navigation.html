@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内蒙古大学校园导航系统</title>
+    <!-- 引入Font Awesome图标库 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header>
+        <div class="logo">
+            <i class="fa fa-map-marker"></i>
+            <h1>内蒙古大学校园导航</h1>
+        </div>
+        
+        <!-- 校区切换 -->
+        <div class="campus-selector">
+            <button class="campus-btn" id="campusBtn">
+                <span id="currentCampus">主校区</span>
+                <i class="fa fa-chevron-down"></i>
+            </button>
+            <div class="campus-dropdown" id="campusDropdown">
+                <div class="campus-option active" data-campus="main" data-lng="111.690187" data-lat="40.81253">
+                    主校区（赛罕区）
+                </div>
+                <div class="campus-option" data-campus="yuquan" data-lng="111.685566" data-lat="40.758903">
+                    玉泉校区
+                </div>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单按钮 -->
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fa fa-bars"></i>
+        </button>
+    </header>
+    
+    <!-- 主内容区 -->
+    <div class="main-container">
+        <!-- 侧边面板 -->
+        <div class="side-panel" id="sidePanel">
+            <h2 class="panel-title">
+                <i class="fa fa-map-o"></i> 路径规划
+            </h2>
+            
+            <form class="route-form" id="routeForm">
+                <div class="form-group">
+                    <i class="fa fa-location-arrow"></i>
+                    <input type="text" class="form-input" id="startPoint" placeholder="输入起点（例如：学生宿舍）" autocomplete="off">
+                </div>
+                
+                <button type="button" class="swap-btn" id="swapBtn">
+                    <i class="fa fa-exchange"></i>
+                </button>
+                
+                <div class="form-group">
+                    <i class="fa fa-flag"></i>
+                    <input type="text" class="form-input" id="endPoint" placeholder="输入终点（例如：图书馆）" autocomplete="off">
+                </div>
+                
+                <button type="submit" class="plan-btn" id="planBtn">
+                    <i class="fa fa-search"></i> 规划路线
+                </button>
+            </form>
+            
+            <!-- 常用地点 -->
+            <div class="common-places">
+                <h3 class="section-title">常用地点</h3>
+                <div class="places-grid">
+                    <div class="place-item" data-name="图书馆" data-lng="" data-lat="">
+                        <i class="fa fa-book"></i>
+                        <span class="place-name">图书馆</span>
+                    </div>
+                    <div class="place-item" data-name="行政楼" data-lng="" data-lat="">
+                        <i class="fa fa-building"></i>
+                        <span class="place-name">行政楼</span>
+                    </div>
+                    <div class="place-item" data-name="第一教学楼" data-lng="" data-lat="">
+                        <i class="fa fa-university"></i>
+                        <span class="place-name">第一教学楼</span>
+                    </div>
+                    <div class="place-item" data-name="学生食堂" data-lng="" data-lat="">
+                        <i class="fa fa-cutlery"></i>
+                        <span class="place-name">学生食堂</span>
+                    </div>
+                    <div class="place-item" data-name="体育馆" data-lng="" data-lat="">
+                        <i class="fa fa-futbol-o"></i>
+                        <span class="place-name">体育馆</span>
+                    </div>
+                    <div class="place-item" data-name="学生宿舍" data-lng="" data-lat="">
+                        <i class="fa fa-bed"></i>
+                        <span class="place-name">学生宿舍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 地图容器 -->
+        <div id="map-container">
+            <div class="loading" id="loading">
+                <i class="fa fa-spinner fa-spin"></i> 地图加载中...
+            </div>
+        </div>
+        
+        <!-- 校区切换提示 -->
+        <div class="campus-change-notice" id="campusChangeNotice">
+            已切换到 <span id="newCampusName">主校区</span>，路线信息已清除
+        </div>
+        
+        <!-- 路线信息显示 -->
+        <div class="route-info-panel" id="routeInfoPanel">
+            <div class="route-info-header">
+                <h3 class="route-info-title">路线信息</h3>
+                <button class="close-route-info" id="closeRouteInfo">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="route-stats">
+                <div class="stat-item">
+                    <i class="fa fa-clock-o"></i>
+                    <div>
+                        <div class="stat-label">预计时间</div>
+                        <div class="stat-value" id="routeTime">10分钟</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fa fa-road"></i>
+                    <div>
+                        <div class="stat-label">距离</div>
+                        <div class="stat-value" id="routeDistance">0.8公里</div>
+                    </div>
+                </div>
+            </div>
+            <div class="route-path" id="routePath">
+                步行导航：从起点出发 → 沿主干道向东行驶 → 左转进入教学区 → 到达终点
+            </div>
+        </div>
+        
+        <div class="overlay" id="overlay"></div>
+    </div>
+
+    <!-- 高德地图API安全配置 -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: '9857ee1e509fe207d6fc2e2e768a38ed',
+        };
+    </script>
+    
+    <!-- 高德地图API -->
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=9857ee1e509fe207d6fc2e2e768a38ed&plugin=AMap.Scale,AMap.ToolBar,AMap.Geocoder"></script>
+    <script src="script.js"></script>
+    
+</body>
+</html>
